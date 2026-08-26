@@ -25,11 +25,9 @@ public class CalculadoraController {
         double precoFinal;
         precoFinal = calculadoraService.calcularPrecoMarketplace(
                 dados.pesoPeca(), dados.precoRolo(), dados.pesoRolo(),
-                dados.potenciaWatts(), dados.horasImpressao(), dados.precoKwh(),
-                dados.precoImpressora(), dados.vidaUtilHoras(),
-                dados.manutencaoAno(), dados.horasUsoAno(),
+                dados.horasImpressao(), dados.precoKwh(),
                 dados.tempoTrabalhoMin(), dados.valorHoraTrabalho(),
-                dados.markupDesejado(), dados.taxaMarketplace()
+                dados.markupDesejado(), dados.taxaMarketplace(), dados.impressoraId()
         );
 
         return precoFinal;
