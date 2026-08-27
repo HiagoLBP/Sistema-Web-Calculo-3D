@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Calculadora de Precificação 3D</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            min-height: 100vh;
+            font-family: "Segoe UI", sans-serif;
+            padding: 40px 0;
+        }
+
+        .main-card {
+            background: rgba(255, 255, 255, 0.98);
+            border: none;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, .2);
+        }
+
+        .header-calculadora {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: white;
+            padding: 35px;
+        }
+
+        .header-calculadora h1 {
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .header-calculadora p {
+            opacity: .8;
+            margin: 0;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eef2f7;
+            padding-bottom: 10px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .form-control,
+        .form-select {
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid #dbe2ea;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, .15);
+        }
+
+        .info-machine {
+            background: #eff6ff;
+            border-left: 4px solid #2563eb;
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .btn-calcular {
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            border: none;
+            border-radius: 14px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            padding: 14px;
+            transition: .3s;
+        }
+
+        .btn-calcular:hover {
+            transform: translateY(-2px);
+            color: white;
+            box-shadow: 0 15px 25px rgba(34, 197, 94, .35);
+        }
+
+        .resultado-card {
+            border-radius: 20px;
+            background: linear-gradient(135deg, #16a34a, #22c55e);
+            color: white;
+            text-align: center;
+            padding: 30px;
+            animation: fadeUp .4s ease;
+        }
+
+        .resultado-preco {
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 10px 0;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-section {
+            background: #f8fafc;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="main-card mx-auto" style="max-width: 950px;">
+
+        <div class="header-calculadora text-center">
+            <h1>
+                <i class="bi bi-cpu"></i>
+                Calculadora de Precificação 3D
+            </h1>
+
+            <p>
+                Calcule custos, energia, mão de obra, markup e lucro em segundos.
+            </p>
+        </div>
+
+        <div class="p-4 p-md-5">
+
+            <form id="formCalculadora">
+
+                <div class="card-section">
+
+                    <h5 class="section-title">
+                        <i class="bi bi-printer"></i>
+                        Máquina e Material
+                    </h5>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-12">
+                            <label class="form-label">
+                                Impressora
+                            </label>
+
+                            <select class="form-select"
+                                    id="impressoraId"
+                                    onchange="mostrarDetalhesImpressora()"
+                                    required>
+                                <option value="">
+                                    Carregando...
+                                </option>
+                            </select>
+
+                            <div id="detalhesImpressora"
+                                 class="info-machine mt-3 small">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Preço do Rolo (R$)
+                            </label>
+
+                            <input type="number"
+                                   step="0.01"
+                                   class="form-control"
+                                   id="precoRolo"
+                                   value="130.00"
+                                   required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Peso do Rolo (g)
+                            </label>
+
+                            <input type="number"
+                                   class="form-control"
+                                   id="pesoRolo"
+                                   value="1000"
+                                   required>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="card-section">
+
+                    <h5 class="section-title">
+                        <i class="bi bi-box-seam"></i>
+                        Dados da Peça
+                    </h5>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Peso da Peça (g)
+                            </label>
+
+                            <input type="number"
+                                   class="form-control"
+                                   id="pesoPeca"
+                                   required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Tempo de Impressão (Horas)
+                            </label>
+
+                            <input type="number"
+                                   class="form-control"
+                                   id="horasImpressao"
+                                   required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Energia (R$/kWh)
+                            </label>
+
+                            <input type="number"
+                                   class="form-control"
+                                   id="precoKwh"
+                                   value="0.90"
+                                   required>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="card-section">
+
+                    <h5 class="section-title">
+                        <i class="bi bi-graph-up-arrow"></i>
+                        Mão de Obra e Lucro
+                    </h5>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Tempo de Trabalho (Min)
+                            </label>
+
+                            <input type="number"
+                                   class="form-control"
+                                   id="tempoTrabalhoMin"
+                                   required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Valor da Hora (R$)
+                            </label>
+
+                            <input type="number"
+                                   class="form-control"
+                                   id="valorHoraTrabalho"
+                                   value="10"
+                                   required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Markup
+                            </label>
+
+                            <input type="number"
+                                   step="0.01"
+                                   class="form-control"
+                                   id="markupDesejado"
+                                   value="1.00"
+                                   required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Taxa Marketplace
+                            </label>
+
+                            <input type="number"
+                                   step="0.01"
+                                   class="form-control"
+                                   id="taxaMarketplace"
+                                   value="0.15"
+                                   required>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <button type="button"
+                        class="btn btn-calcular w-100"
+                        onclick="calcularPreco()">
+
+                    <i class="bi bi-calculator-fill me-2"></i>
+                    Calcular Preço Final
+
+                </button>
+
+            </form>
+
+            <div id="resultadoBox"
+                 class="resultado-card mt-4 d-none">
+
+                <h6 class="text-uppercase">
+                    Preço Sugerido
+                </h6>
+
+                <div class="resultado-preco">
+                    R$ <span id="valorFinal">0,00</span>
+                </div>
+
+                <p class="mb-0 opacity-75">
+                    Valor calculado considerando custos,
+                    energia, mão de obra, markup e taxas.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+    let listaImpressoras = [];
+
+    document.addEventListener("DOMContentLoaded", function () {
+        carregarImpressoras();
+    });
+
+    function carregarImpressoras() {
+
+        fetch('/api/impressoras')
+
+            .then(response => response.json())
+
+            .then(impressoras => {
+
+                listaImpressoras = impressoras;
+
+                const select =
+                    document.getElementById('impressoraId');
+
+                select.innerHTML =
+                    '<option value="">Escolha uma impressora...</option>';
+
+                impressoras.forEach(imp => {
+
+                    const option =
+                        document.createElement('option');
+
+                    option.value = imp.id;
+                    option.text = imp.nome;
+
+                    select.appendChild(option);
+
+                });
+
+            })
+
+            .catch(error => {
+                console.error(error);
+            });
+
+    }
+
+    function mostrarDetalhesImpressora() {
+
+        const select =
+            document.getElementById('impressoraId');
+
+        const detalhes =
+            document.getElementById('detalhesImpressora');
+
+        if (!select.value) {
+
+            detalhes.innerHTML = "";
+            return;
+
+        }
+
+        const imp =
+            listaImpressoras.find(i =>
+                i.id == select.value
+            );
+
+        if (imp) {
+
+            detalhes.innerHTML = `
+                    <div class="row text-center">
+                        <div class="col">
+                            <div class="fw-bold text-primary">
+                                ${imp.potenciaWatts}W
+                            </div>
+                            <small>Potência</small>
+                        </div>
+
+                        <div class="col">
+                            <div class="fw-bold text-success">
+                                R$ ${imp.precoImpressora.toFixed(2)}
+                            </div>
+                            <small>Máquina</small>
+                        </div>
+
+                        <div class="col">
+                            <div class="fw-bold text-warning">
+                                R$ ${imp.manutencaoAno}
+                            </div>
+                            <small>Manutenção/Ano</small>
+                        </div>
+                    </div>
+                `;
+        }
+
+    }
+
+    function calcularPreco() {
+
+        const dados = {
+
+            impressoraId:
+                parseFloat(document.getElementById('impressoraId').value),
+
+            precoRolo:
+                parseFloat(document.getElementById('precoRolo').value),
+
+            pesoRolo:
+                parseFloat(document.getElementById('pesoRolo').value),
+
+            pesoPeca:
+                parseFloat(document.getElementById('pesoPeca').value),
+
+            horasImpressao:
+                parseFloat(document.getElementById('horasImpressao').value),
+
+            precoKwh:
+                parseFloat(document.getElementById('precoKwh').value),
+
+            tempoTrabalhoMin:
+                parseFloat(document.getElementById('tempoTrabalhoMin').value),
+
+            valorHoraTrabalho:
+                parseFloat(document.getElementById('valorHoraTrabalho').value),
+
+            markupDesejado:
+                parseFloat(document.getElementById('markupDesejado').value),
+
+            taxaMarketplace:
+                parseFloat(document.getElementById('taxaMarketplace').value)
+
+        };
+
+        fetch('/api/calculadora/calcular', {
+
+            method: 'POST',
+
+            headers: {
+                'Content-Type': 'application/json'
+            },
+
+            body: JSON.stringify(dados)
+
+        })
+
+            .then(response => response.json())
+
+            .then(preco => {
+
+                document.getElementById('resultadoBox')
+                    .classList.remove('d-none');
+
+                document.getElementById('valorFinal')
+                    .innerText =
+                    preco.toFixed(2).replace('.', ',');
+
+            })
+
+            .catch(error => {
+
+                console.error(error);
+
+                alert(
+                    'Erro ao calcular! Verifique os dados informados.'
+                );
+
+            });
+
+    }
+
+</script>
+
+</body>
+
+</html>
