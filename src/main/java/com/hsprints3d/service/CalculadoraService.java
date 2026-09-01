@@ -1,5 +1,6 @@
 package com.hsprints3d.service;
 
+import com.hsprints3d.model.CalculoResponse;
 import com.hsprints3d.model.Impressora;
 import com.hsprints3d.repository.ImpressoraRepository;
 import org.springframework.stereotype.Service;
@@ -9,25 +10,21 @@ public class CalculadoraService {
 
     private final ImpressoraRepository impressoraRepository;
 
-    // Injetamos o repositório para o Service conseguir buscar no banco
     public CalculadoraService(ImpressoraRepository impressoraRepository) {
         this.impressoraRepository = impressoraRepository;
     }
 
-    public double calcularPrecoMarketplace(
+    public CalculoResponse calcularPrecoMarketplace(
             double pesoPeca, double precoRolo, double pesoRolo,
             double horasImpressao, double precoKwh,
             double tempoTrabalhoMin, double valorHoraTrabalho,
             double markupDesejado, double taxaMarketplace, Long impressoraId) {
 
-        // busca a impressora pelo ID
-        // Se o usuário mandar um ID que não existe, ele devolve um erro
         Impressora impressora = impressoraRepository.findById(impressoraId)
-                .orElseThrow(() -> new RuntimeException("Impressora não encontrada no banco!"));
+                .orElseThrow(() -> new RuntimeException("Impressora não encontrada!"));
 
         double precoPorGrama = precoRolo / pesoRolo;
         double custoFilamento = pesoPeca * precoPorGrama;
-
 
         double consumoKw = impressora.getPotenciaWatts() / 1000.0;
         double custoEnergia = consumoKw * horasImpressao * precoKwh;
@@ -42,10 +39,22 @@ public class CalculadoraService {
         double custoMaoDeObra = horasTrabalhadas * valorHoraTrabalho;
 
         double custoTotal = custoFilamento + custoEnergia + custoDepreciacao + custoManutencao + custoMaoDeObra;
-        double subtotalComLucro = custoTotal + (custoTotal * markupDesejado);
+        double valorLucro = custoTotal * markupDesejado;
+        double subtotalComLucro = custoTotal + valorLucro;
+
         double divisorTaxa = 1.0 - taxaMarketplace;
         double precoDeVenda = subtotalComLucro / divisorTaxa;
+        double valorTaxa = precoDeVenda - subtotalComLucro;
 
-        return Math.round(precoDeVenda * 100.0) / 100.0;
+        return new CalculoResponse(
+                Math.round(custoFilamento * 100.0) / 100.0,
+                Math.round(custoEnergia * 100.0) / 100.0,
+                Math.round(custoManutencao * 100.0) / 100.0,
+                Math.round(custoDepreciacao * 100.0) / 100.0,
+                Math.round(custoMaoDeObra * 100.0) / 100.0,
+                Math.round(valorLucro * 100.0) / 100.0,
+                Math.round(valorTaxa * 100.0) / 100.0,
+                Math.round(precoDeVenda * 100.0) / 100.0
+        );
     }
 }
