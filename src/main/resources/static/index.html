@@ -1,529 +1,208 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Calculadora de Precificação 3D</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
-    https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css
-
-    <style>
-        body {
-            background: linear-gradient(135deg, #0f172a, #1e293b);
-            min-height: 100vh;
-            font-family: "Segoe UI", sans-serif;
-            padding: 40px 0;
-        }
-
-        .main-card {
-            background: rgba(255, 255, 255, 0.98);
-            border: none;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, .2);
-        }
-
-        .header-calculadora {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
-            color: white;
-            padding: 35px;
-        }
-
-        .header-calculadora h1 {
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .header-calculadora p {
-            opacity: .8;
-            margin: 0;
-        }
-
-        .section-title {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #334155;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #eef2f7;
-            padding-bottom: 10px;
-        }
-
-        .form-label {
-            font-weight: 600;
-            color: #475569;
-        }
-
-        .form-control,
-        .form-select {
-            border-radius: 12px;
-            padding: 12px;
-            border: 1px solid #dbe2ea;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, .15);
-        }
-
-        .info-machine {
-            background: #eff6ff;
-            border-left: 4px solid #2563eb;
-            border-radius: 12px;
-            padding: 15px;
-        }
-
-        .btn-calcular {
-            background: linear-gradient(135deg, #16a34a, #22c55e);
-            border: none;
-            border-radius: 14px;
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 700;
-            padding: 14px;
-            transition: .3s;
-        }
-
-        .btn-calcular:hover {
-            transform: translateY(-2px);
-            color: white;
-            box-shadow: 0 15px 25px rgba(34, 197, 94, .35);
-        }
-
-        .resultado-card {
-            border-radius: 20px;
-            background: linear-gradient(135deg, #16a34a, #22c55e);
-            color: white;
-            text-align: center;
-            padding: 30px;
-            animation: fadeUp .4s ease;
-        }
-
-        .resultado-preco {
-            font-size: 3rem;
-            font-weight: 800;
-            margin: 10px 0;
-        }
-
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(15px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .card-section {
-            background: #f8fafc;
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 25px;
-        }
-    </style>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
-
 <body>
 
-<div class="container">
+<div class="grid-backdrop"></div>
 
-    <div class="main-card mx-auto" style="max-width: 950px;">
+<div class="page">
+    <header class="masthead">
+        <h1>Calculadora de precificação 3D</h1>
+        <p>Reúna o custo do filamento, a energia da impressora, seu tempo de trabalho e a taxa do marketplace em um preço final justo para cada peça.</p>
+    </header>
 
-        <div class="header-calculadora text-center">
-            <h1>
-                <i class="bi bi-cpu"></i>
-                Calculadora de Precificação 3D
-            </h1>
-
-            <p>
-                Calcule custos, energia, mão de obra, markup e lucro em segundos.
-            </p>
+    <nav class="nav-tabs" style="display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; gap: 12px;">
+            <button id="btnTabCalculadora" class="nav-btn active" onclick="switchTab('calculadora')">Calculadora</button>
+            <button id="btnTabEstoque" class="nav-btn" onclick="switchTab('estoque')">Meu Estoque</button>
         </div>
 
-        <div class="p-4 p-md-5">
+        <!-- Botões de Backup -->
+        <div style="display: flex; gap: 8px;">
+            <button type="button" class="nav-btn" onclick="exportarBackup()" style="border-style: dashed;">📥 Exportar Backup</button>
+            <button type="button" class="nav-btn" onclick="document.getElementById('fileImport').click()" style="border-style: dashed;">📤 Importar Backup</button>
 
-            <form id="formCalculadora">
+            <!-- Input oculto para abrir a janela de seleção de arquivo -->
+            <input type="file" id="fileImport" class="d-none" accept=".json" onchange="importarBackup(event)">
+        </div>
+    </nav>
 
-                <div class="card-section">
+    <!-- ABA DA CALCULADORA -->
+    <div id="tabCalculadora" class="workspace">
+        <form id="formCalculadora" class="panel-form">
+            <section class="field-group">
+                <div class="field-group-head">
+                    <span class="fg-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2.6"/><path d="M12 3.5v3M12 17.5v3M3.5 12h3M17.5 12h3"/></svg>
+                    </span>
+                    <h2>Máquina e material</h2>
+                </div>
 
-                    <h5 class="section-title">
-                        <i class="bi bi-printer"></i>
-                        Máquina e Material
-                    </h5>
+                <div class="field-row single">
+                    <div class="field">
+                        <label for="impressoraId">Impressora</label>
+                        <select id="impressoraId" onchange="mostrarDetalhesImpressora()" required>
+                            <option value="">Carregando...</option>
+                        </select>
+                    </div>
+                </div>
 
-                    <div class="row g-3">
+                <div id="detalhesImpressora" class="machine-plate machine-plate--empty">
+                    Selecione uma impressora para ver os detalhes.
+                </div>
 
-                        <div class="col-md-12">
-                            <label class="form-label">
-                                Impressora
-                            </label>
+                <div class="field-row">
+                    <div class="field">
+                        <label for="precoRolo">Preço do rolo (R$)</label>
+                        <input type="number" step="0.01" id="precoRolo" value="130.00" required>
+                    </div>
+                    <div class="field">
+                        <label for="pesoRolo">Peso do rolo (g)</label>
+                        <input type="number" id="pesoRolo" value="1000" required>
+                    </div>
+                </div>
+            </section>
 
-                            <select class="form-select"
-                                    id="impressoraId"
-                                    onchange="mostrarDetalhesImpressora()"
-                                    required>
-                                <option value="">
-                                    Carregando...
-                                </option>
-                            </select>
+            <section class="field-group">
+                <div class="field-group-head">
+                    <span class="fg-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3.5l7.5 4.25v8.5L12 20.5l-7.5-4.25v-8.5L12 3.5z"/><path d="M12 12v8.5M12 12l7.5-4.25M12 12l-7.5-4.25"/></svg>
+                    </span>
+                    <h2>Dados da peça</h2>
+                </div>
 
-                            <div id="detalhesImpressora"
-                                 class="info-machine mt-3 small">
-                            </div>
-                        </div>
+                <div class="field-row single">
+                    <div class="field">
+                        <label for="nomePeca">Nome da peça</label>
+                        <input type="text" id="nomePeca" placeholder="Ex: Action Figure Batman" required>
+                    </div>
+                </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label">
-                                Preço do Rolo (R$)
-                            </label>
+                <div class="field-row">
+                    <div class="field">
+                        <label for="pesoPeca">Peso da peça (g)</label>
+                        <input type="number" id="pesoPeca" required>
+                    </div>
+                    <div class="field">
+                        <label for="horasImpressao">Tempo de impressão (h)</label>
+                        <input type="number" id="horasImpressao" required>
+                    </div>
+                </div>
+                <div class="field-row single">
+                    <div class="field">
+                        <label for="precoKwh">Energia (R$/kWh)</label>
+                        <input type="number" id="precoKwh" value="0.90" required>
+                    </div>
+                </div>
+            </section>
 
-                            <input type="number"
-                                   step="0.01"
-                                   class="form-control"
-                                   id="precoRolo"
-                                   value="130.00"
-                                   required>
-                        </div>
+            <section class="field-group">
+                <div class="field-group-head">
+                    <span class="fg-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+                    </span>
+                    <h2>Mão de obra e margem</h2>
+                </div>
 
-                        <div class="col-md-6">
-                            <label class="form-label">
-                                Peso do Rolo (g)
-                            </label>
+                <div class="field-row">
+                    <div class="field">
+                        <label for="tempoTrabalhoMin">Tempo de trabalho (min)</label>
+                        <input type="number" id="tempoTrabalhoMin" required>
+                    </div>
+                    <div class="field">
+                        <label for="valorHoraTrabalho">Valor da hora (R$)</label>
+                        <input type="number" id="valorHoraTrabalho" value="10" required>
+                    </div>
+                    <div class="field">
+                        <label for="markupDesejado">Markup</label>
+                        <input type="number" step="0.01" id="markupDesejado" value="1.00" required>
+                    </div>
+                    <div class="field">
+                        <label for="taxaMarketplace">Taxa do marketplace</label>
+                        <input type="number" step="0.01" id="taxaMarketplace" value="0.15" required>
+                    </div>
+                </div>
+            </section>
+        </form>
 
-                            <input type="number"
-                                   class="form-control"
-                                   id="pesoRolo"
-                                   value="1000"
-                                   required>
-                        </div>
+        <aside class="result-panel">
+            <div class="result-panel-inner">
+                <div class="result-rail"><div class="result-rail-head" id="resultRailHead"></div></div>
 
+                <div class="result-idle" id="resultIdle">
+                    Preencha os dados ao lado para ver o preço sugerido.
+                </div>
+
+                <div class="result-filled d-none" id="resultadoBox">
+                    <span class="result-label">Preço sugerido</span>
+                    <div class="result-value">R$ <span id="valorFinal">0,00</span></div>
+                    <p class="result-caption">Calculado com base no material, energia, mão de obra, markup e taxa informados.</p>
+
+                    <!-- NOVA LISTA DE CUSTOS SEPARADOS -->
+                    <div class="breakdown-list">
+                        <div class="breakdown-item"><span>Material:</span> <strong id="bkMaterial">R$ 0,00</strong></div>
+                        <div class="breakdown-item"><span>Energia:</span> <strong id="bkEnergia">R$ 0,00</strong></div>
+                        <div class="breakdown-item"><span>Manutenção:</span> <strong id="bkManutencao">R$ 0,00</strong></div>
+                        <div class="breakdown-item"><span>Depreciação:</span> <strong id="bkDepreciacao">R$ 0,00</strong></div>
+                        <div class="breakdown-item"><span>Mão de Obra:</span> <strong id="bkMaoObra">R$ 0,00</strong></div>
+                        <div class="breakdown-item"><span>Lucro:</span> <strong id="bkLucro" style="color: var(--result);">R$ 0,00</strong></div>
+                        <div class="breakdown-item"><span>Taxa Marketplace:</span> <strong id="bkTaxa" style="color: var(--danger);">R$ 0,00</strong></div>
                     </div>
 
+                    <button type="button" class="btn-calc d-none" id="btnSalvar" style="margin-top: 15px; background: var(--result); color: var(--bg); width: 100%;" onclick="salvarOrcamento()">Salvar no Estoque</button>
+                </div>
+                <div class="result-error d-none" id="resultError">
+                    Não foi possível calcular. Confira os dados e tente novamente.
                 </div>
 
-                <div class="card-section">
+                <button type="button" class="btn-calc" onclick="calcularPreco()">Calcular preço</button>
+            </div>
+        </aside>
+    </div>
 
-                    <h5 class="section-title">
-                        <i class="bi bi-box-seam"></i>
-                        Dados da Peça
-                    </h5>
-
-                    <div class="row g-3">
-
-                        <div class="col-md-6">
-                            <label class="form-label">
-                                Peso da Peça (g)
-                            </label>
-
-                            <input type="number"
-                                   class="form-control"
-                                   id="pesoPeca"
-                                   required>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">
-                                Tempo de Impressão (Horas)
-                            </label>
-
-                            <input type="number"
-                                   class="form-control"
-                                   id="horasImpressao"
-                                   required>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">
-                                Energia (R$/kWh)
-                            </label>
-
-                            <input type="number"
-                                   class="form-control"
-                                   id="precoKwh"
-                                   value="0.90"
-                                   required>
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <div class="card-section">
-
-                    <h5 class="section-title">
-                        <i class="bi bi-graph-up-arrow"></i>
-                        Mão de Obra e Lucro
-                    </h5>
-
-                    <div class="row g-3">
-
-                        <div class="col-md-6">
-                            <label class="form-label">
-                                Tempo de Trabalho (Min)
-                            </label>
-
-                            <input type="number"
-                                   class="form-control"
-                                   id="tempoTrabalhoMin"
-                                   required>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">
-                                Valor da Hora (R$)
-                            </label>
-
-                            <input type="number"
-                                   class="form-control"
-                                   id="valorHoraTrabalho"
-                                   value="10"
-                                   required>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">
-                                Markup
-                            </label>
-
-                            <input type="number"
-                                   step="0.01"
-                                   class="form-control"
-                                   id="markupDesejado"
-                                   value="1.00"
-                                   required>
-                        </div>
-
-                        <div class="col-md-6">
-                            <label class="form-label">
-                                Taxa Marketplace
-                            </label>
-
-                            <input type="number"
-                                   step="0.01"
-                                   class="form-control"
-                                   id="taxaMarketplace"
-                                   value="0.15"
-                                   required>
-                        </div>
-
-                    </div>
-
-                </div>
-
-                <button type="button"
-                        class="btn btn-calcular w-100"
-                        onclick="calcularPreco()">
-
-                    <i class="bi bi-calculator-fill me-2"></i>
-                    Calcular Preço Final
-
-                </button>
-
-            </form>
-
-            <div id="resultadoBox"
-                 class="resultado-card mt-4 d-none">
-
-                <h6 class="text-uppercase">
-                    Preço Sugerido
-                </h6>
-
-                <div class="resultado-preco">
-                    R$ <span id="valorFinal">0,00</span>
-                </div>
-
-                <p class="mb-0 opacity-75">
-                    Valor calculado considerando custos,
-                    energia, mão de obra, markup e taxas.
-                </p>
-
+    <!-- ABA DE ESTOQUE -->
+    <div id="tabEstoque" class="d-none">
+        <section class="field-group" style="width: 100%; max-width: 900px; margin: 0 auto;">
+            <div class="field-group-head">
+                <span class="fg-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+                </span>
+                <h2>Peças Salvas no Estoque</h2>
             </div>
 
-        </div>
+            <div class="table-responsive">
+                <table class="estoque-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome da Peça</th>
+                        <th>Peso</th>
+                        <th>Tempo</th>
+                        <th>Preço Final</th>
+                        <th>Data</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody id="estoqueTbody">
 
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </div>
 
 </div>
-
-<script>
-
-    let listaImpressoras = [];
-
-    document.addEventListener("DOMContentLoaded", function () {
-        carregarImpressoras();
-    });
-
-    function carregarImpressoras() {
-
-        fetch('/api/impressoras')
-
-            .then(response => response.json())
-
-            .then(impressoras => {
-
-                listaImpressoras = impressoras;
-
-                const select =
-                    document.getElementById('impressoraId');
-
-                select.innerHTML =
-                    '<option value="">Escolha uma impressora...</option>';
-
-                impressoras.forEach(imp => {
-
-                    const option =
-                        document.createElement('option');
-
-                    option.value = imp.id;
-                    option.text = imp.nome;
-
-                    select.appendChild(option);
-
-                });
-
-            })
-
-            .catch(error => {
-                console.error(error);
-            });
-
-    }
-
-    function mostrarDetalhesImpressora() {
-
-        const select =
-            document.getElementById('impressoraId');
-
-        const detalhes =
-            document.getElementById('detalhesImpressora');
-
-        if (!select.value) {
-
-            detalhes.innerHTML = "";
-            return;
-
-        }
-
-        const imp =
-            listaImpressoras.find(i =>
-                i.id == select.value
-            );
-
-        if (imp) {
-
-            detalhes.innerHTML = `
-                    <div class="row text-center">
-                        <div class="col">
-                            <div class="fw-bold text-primary">
-                                ${imp.potenciaWatts}W
-                            </div>
-                            <small>Potência</small>
-                        </div>
-
-                        <div class="col">
-                            <div class="fw-bold text-success">
-                                R$ ${imp.precoImpressora.toFixed(2)}
-                            </div>
-                            <small>Máquina</small>
-                        </div>
-
-                        <div class="col">
-                            <div class="fw-bold text-warning">
-                                R$ ${imp.manutencaoAno}
-                            </div>
-                            <small>Manutenção/Ano</small>
-                        </div>
-                    </div>
-                `;
-        }
-
-    }
-
-    function calcularPreco() {
-
-        const dados = {
-
-            impressoraId:
-                parseFloat(document.getElementById('impressoraId').value),
-
-            precoRolo:
-                parseFloat(document.getElementById('precoRolo').value),
-
-            pesoRolo:
-                parseFloat(document.getElementById('pesoRolo').value),
-
-            pesoPeca:
-                parseFloat(document.getElementById('pesoPeca').value),
-
-            horasImpressao:
-                parseFloat(document.getElementById('horasImpressao').value),
-
-            precoKwh:
-                parseFloat(document.getElementById('precoKwh').value),
-
-            tempoTrabalhoMin:
-                parseFloat(document.getElementById('tempoTrabalhoMin').value),
-
-            valorHoraTrabalho:
-                parseFloat(document.getElementById('valorHoraTrabalho').value),
-
-            markupDesejado:
-                parseFloat(document.getElementById('markupDesejado').value),
-
-            taxaMarketplace:
-                parseFloat(document.getElementById('taxaMarketplace').value)
-
-        };
-
-        fetch('/api/calculadora/calcular', {
-
-            method: 'POST',
-
-            headers: {
-                'Content-Type': 'application/json'
-            },
-
-            body: JSON.stringify(dados)
-
-        })
-
-            .then(response => response.json())
-
-            .then(preco => {
-
-                document.getElementById('resultadoBox')
-                    .classList.remove('d-none');
-
-                document.getElementById('valorFinal')
-                    .innerText =
-                    preco.toFixed(2).replace('.', ',');
-
-            })
-
-            .catch(error => {
-
-                console.error(error);
-
-                alert(
-                    'Erro ao calcular! Verifique os dados informados.'
-                );
-
-            });
-
-    }
-
-</script>
+<script src="/js/main.js"></script>
 
 </body>
-
 </html>
