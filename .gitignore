@@ -1,39 +1,78 @@
+# ==============================
+# Maven
+# ==============================
+
 target/
-!.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-.kotlin
 
-### IntelliJ IDEA ###
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
+# Maven Wrapper
+.mvn/wrapper/maven-wrapper.jar
+
+# Kotlin
+.kotlin/
+
+
+# ==============================
+# Spring Boot
+# ==============================
+
+# Configurações locais com credenciais
+src/main/resources/application.properties
+
+
+# ==============================
+# IntelliJ IDEA
+# ==============================
+
+.idea/
 *.iws
 *.iml
 *.ipr
 
-### Eclipse ###
+
+# ==============================
+# Eclipse
+# ==============================
+
 .apt_generated
 .classpath
 .factorypath
 .project
-.settings
+.settings/
 .springBeans
 .sts4-cache
 
-### NetBeans ###
+
+# ==============================
+# NetBeans
+# ==============================
+
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
+
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
+
+# ==============================
+# Visual Studio Code
+# ==============================
+
 .vscode/
 
-### Mac OS ###
+
+# ==============================
+# Sistema Operacional
+# ==============================
+
+# macOS
 .DS_Store
+
+# Windows
+Thumbs.db
+Desktop.ini
