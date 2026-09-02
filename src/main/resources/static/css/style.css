@@ -193,3 +193,76 @@ html, body {
 }
 
 .d-none { display: none !important; }
+
+/* ---------- Dashboard Financeiro ---------- */
+.dash-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+@media (max-width: 768px) { .dash-grid { grid-template-columns: 1fr; } }
+
+.dash-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    text-align: center;
+}
+.dash-card-title {
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+.dash-card-value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+}
+.text-danger { color: var(--danger); }
+
+/* ---------- Badges de Status (Estoque) ---------- */
+.badge {
+    padding: 6px 10px;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.badge-disponivel {
+    background: rgba(255, 138, 61, 0.12);
+    color: var(--accent);
+    border: 1px solid rgba(255, 138, 61, 0.25);
+}
+.badge-vendido {
+    background: rgba(53, 214, 154, 0.12);
+    color: var(--result);
+    border: 1px solid rgba(53, 214, 154, 0.25);
+}
+
+.btn-expand {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    transition: transform 0.2s ease;
+}
+.btn-expand.expanded {
+    transform: rotate(90deg);
+}
+.details-row td {
+    padding: 0 !important;
+    border-bottom: none !important;
+}
+.details-content {
+    padding: 16px 24px;
+    background: rgba(0, 0, 0, 0.15);
+    border-bottom: 1px solid var(--line);
+    border-left: 2px solid var(--accent);
+}
