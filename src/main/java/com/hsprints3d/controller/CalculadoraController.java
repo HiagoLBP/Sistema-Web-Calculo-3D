@@ -4,6 +4,7 @@ import com.hsprints3d.model.CalculoRequest;
 import com.hsprints3d.model.CalculoResponse;
 import com.hsprints3d.service.CalculadoraService;
 import jakarta.annotation.Nonnull;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,8 +22,7 @@ public class CalculadoraController {
     }
 
     @PostMapping("/calcular")
-    public CalculoResponse calcular(@Nonnull @RequestBody CalculoRequest dados){
-        // O service agora devolve o objeto completo com o breakdown
+    public CalculoResponse calcular(@Nonnull @Valid @RequestBody CalculoRequest dados){
         return calculadoraService.calcularPrecoMarketplace(
                 dados.pesoPeca(), dados.precoRolo(), dados.pesoRolo(),
                 dados.horasImpressao(), dados.precoKwh(),
