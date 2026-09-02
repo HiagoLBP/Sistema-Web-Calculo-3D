@@ -10,6 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
@@ -25,6 +26,7 @@
         <div style="display: flex; gap: 12px;">
             <button id="btnTabCalculadora" class="nav-btn active" onclick="switchTab('calculadora')">Calculadora</button>
             <button id="btnTabEstoque" class="nav-btn" onclick="switchTab('estoque')">Meu Estoque</button>
+            <button id="btnTabFinanceiro" class="nav-btn" onclick="switchTab('financeiro')">Financeiro</button>
         </div>
 
         <!-- Botões de Backup -->
@@ -94,8 +96,8 @@
                         <input type="number" id="pesoPeca" required>
                     </div>
                     <div class="field">
-                        <label for="horasImpressao">Tempo de impressão (h)</label>
-                        <input type="number" id="horasImpressao" required>
+                        <label for="horasImpressao">Tempo de impressão (hh:mm)</label>
+                        <input type="text" id="horasImpressao" placeholder="00:00" maxlength="5" onkeyup="formatarTempo(this)" required>
                     </div>
                 </div>
                 <div class="field-row single">
@@ -184,11 +186,13 @@
                 <table class="estoque-table">
                     <thead>
                     <tr>
+                        <th></th>
                         <th>ID</th>
                         <th>Nome da Peça</th>
                         <th>Peso</th>
                         <th>Tempo</th>
                         <th>Preço Final</th>
+                        <th>Status</th>
                         <th>Data</th>
                         <th></th>
                     </tr>
@@ -200,6 +204,85 @@
             </div>
         </section>
     </div>
+
+    <!-- ABA FINANCEIRO -->
+    <div id="tabFinanceiro" class="d-none">
+
+        <div class="dash-grid">
+            <div class="dash-card">
+                <div class="dash-card-title">Saldo Atual</div>
+                <div class="dash-card-value" id="dashSaldo">R$ 0,00</div>
+            </div>
+            <div class="dash-card">
+                <div class="dash-card-title">Total Receitas</div>
+                <div class="dash-card-value text-accent" id="dashReceitas">R$ 0,00</div>
+            </div>
+            <div class="dash-card">
+                <div class="dash-card-title">Total Despesas</div>
+                <div class="dash-card-value text-danger" id="dashDespesas">R$ 0,00</div>
+            </div>
+        </div>
+
+        <div class="workspace" style="margin-top: 28px; grid-template-columns: 1fr 1fr;">
+
+            <div class="panel-form">
+                <section class="field-group" style="height: 100%;">
+                    <div class="field-group-head">
+                        <h2>Balanço Financeiro</h2>
+                        <input type="month" id="filtroMesFinanceiro" style="background: var(--surface-2); border: 1px solid var(--line); color: var(--text); border-radius: var(--radius-sm); padding: 6px 12px; font-family: inherit;" onchange="carregarFinanceiro()">
+                    </div>
+                    <div style="position: relative; height:250px; width:100%; display: flex; justify-content: center;">
+                        <canvas id="graficoFinanceiro"></canvas>
+                    </div>
+
+                    <hr style="border-color: var(--line); margin: 24px 0;">
+
+                    <h3 style="font-size: 0.9rem; color: var(--text-dim); margin-bottom: 12px;">Adicionar Lançamento Manual</h3>
+                    <div class="field-row">
+                        <div class="field">
+                            <input type="text" id="descTransacao" placeholder="Descrição (Ex: Compra PLA)">
+                        </div>
+                        <div class="field">
+                            <input type="number" id="valorTransacao" step="0.01" placeholder="Valor (R$)">
+                        </div>
+                    </div>
+                    <div class="field-row" style="margin-top: 12px;">
+                        <div class="field">
+                            <select id="tipoTransacao">
+                                <option value="RECEITA">Receita (Entrada)</option>
+                                <option value="DESPESA">Despesa (Saída)</option>
+                            </select>
+                        </div>
+                        <button class="btn-calc" style="padding: 11px;" onclick="salvarTransacao()">Lançar</button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Tabela de Histórico -->
+            <section class="field-group" style="height: 100%;">
+                <div class="field-group-head">
+                    <h2>Histórico de Transações</h2>
+                </div>
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table class="estoque-table">
+                        <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Descrição</th>
+                            <th>Tipo</th>
+                            <th style="text-align: right;">Valor</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody id="financeiroTbody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
 
 </div>
 <script src="/js/main.js"></script>
