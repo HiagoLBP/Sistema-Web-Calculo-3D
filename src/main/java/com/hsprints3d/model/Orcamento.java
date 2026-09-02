@@ -15,6 +15,15 @@ public class Orcamento {
     private double pesoPeca;
     private double horasImpressao;
     private double precoFinal;
+    private boolean vendido = false;
+
+    private double custoMaterial;
+    private double custoEnergia;
+    private double custoManutencao;
+    private double custoDepreciacao;
+    private double custoMaoDeObra;
+    private double valorLucro;
+    private double valorTaxa;
 
     private LocalDateTime dataCalculo = LocalDateTime.now();
 
@@ -64,5 +73,69 @@ public class Orcamento {
 
     public void setDataCalculo(LocalDateTime dataCalculo) {
         this.dataCalculo = dataCalculo;
+    }
+
+    public boolean isVendido() {
+        return vendido;
+    }
+
+    public void setVendido(boolean vendido) {
+        this.vendido = vendido;
+    }
+
+    public double getCustoMaterial() {
+        return custoMaterial;
+    }
+
+    public void setCustoMaterial(double custoMaterial) {
+        this.custoMaterial = custoMaterial;
+    }
+
+    public double getCustoEnergia() {
+        return custoEnergia;
+    }
+
+    public void setCustoEnergia(double custoEnergia) {
+        this.custoEnergia = custoEnergia;
+    }
+
+    public double getCustoManutencao() {
+        return custoManutencao;
+    }
+
+    public void setCustoManutencao(double custoManutencao) {
+        this.custoManutencao = custoManutencao;
+    }
+
+    public double getCustoDepreciacao() {
+        return custoDepreciacao;
+    }
+
+    public void setCustoDepreciacao(double custoDepreciacao) {
+        this.custoDepreciacao = custoDepreciacao;
+    }
+
+    public double getCustoMaoDeObra() {
+        return custoMaoDeObra;
+    }
+
+    public void setCustoMaoDeObra(double custoMaoDeObra) {
+        this.custoMaoDeObra = custoMaoDeObra;
+    }
+
+    public double getValorLucro() {
+        return valorLucro;
+    }
+
+    public void setValorLucro(double valorLucro) {
+        this.valorLucro = valorLucro;
+    }
+
+    public double getValorTaxa() {
+        return valorTaxa;
+    }
+
+    public void setValorTaxa(double valorTaxa) {
+        this.valorTaxa = valorTaxa;
     }
 }
