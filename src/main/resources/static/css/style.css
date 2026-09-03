@@ -266,3 +266,53 @@ html, body {
     border-bottom: 1px solid var(--line);
     border-left: 2px solid var(--accent);
 }
+
+/* --- Modal Styles --- */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: rgba(13, 17, 23, 0.8);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    width: 90%;
+    max-width: 550px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* --- Ajustes de Responsividade (Mobile) --- */
+.modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 600px) {
+    .modal-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .page {
+        padding: 32px 16px 64px;
+    }
+
+    .nav-tabs {
+        flex-wrap: wrap;
+    }
+    .nav-btn {
+        flex-grow: 1;
+        text-align: center;
+    }
+}

@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Calculadora de Precificação 3D</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -53,9 +54,14 @@
                 <div class="field-row single">
                     <div class="field">
                         <label for="impressoraId">Impressora</label>
-                        <select id="impressoraId" onchange="mostrarDetalhesImpressora()" required>
-                            <option value="">Carregando...</option>
-                        </select>
+                        <div style="display: flex; gap: 8px;">
+                            <select id="impressoraId" onchange="mostrarDetalhesImpressora()" style="flex: 1;" required>
+                                <option value="">Escolha uma impressora...</option>
+                            </select>
+                            <button type="button" class="btn-expand" onclick="abrirModalImpressoras()" title="Configurar Impressoras" style="width: 42px; display: flex; align-items: center; justify-content: center;">
+                                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -279,11 +285,61 @@
                     </table>
                 </div>
             </section>
-
         </div>
     </div>
+</div>
+<!-- Modal de Impressoras -->
+<div id="modalImpressoras" class="modal-overlay d-none">
+    <div class="modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0; font-size: 1.2rem;">Configurar Impressoras</h2>
+            <button class="btn-delete" onclick="fecharModalImpressoras()" style="font-size: 1.5rem;">&times;</button>
+        </div>
 
+        <form id="formImpressora" onsubmit="salvarImpressora(event)">
+            <input type="hidden" id="impModalId">
+            <div class="field">
+                <label for="impModalNome">Nome da Impressora</label>
+                <input type="text" id="impModalNome" placeholder="Ex: Bambu Lab P1S" required>
+            </div>
 
+            <div class="modal-grid">
+                <div class="field">
+                    <label for="impModalPotencia">Potência (W)</label>
+                    <input type="number" id="impModalPotencia" required min="0" step="1">
+                </div>
+                <div class="field">
+                    <label for="impModalPreco">Valor Máquina (R$)</label>
+                    <input type="number" id="impModalPreco" required min="0" step="0.01">
+                </div>
+                <div class="field">
+                    <label for="impModalManutencao">Manutenção/Ano (R$)</label>
+                    <input type="number" id="impModalManutencao" required min="0" step="0.01">
+                </div>
+                <div class="field">
+                    <label for="impModalVidaUtil">Vida Útil (Horas)</label>
+                    <input type="number" id="impModalVidaUtil" required min="0" step="1">
+                </div>
+                <div class="field">
+                    <label for="impModalHorasAno">Horas Uso/Ano</label>
+                    <input type="number" id="impModalHorasAno" required min="0" step="1">
+                </div>
+            </div>
+
+            <button type="submit" style="width: 100%; margin-top: 15px; padding: 12px; background-color: var(--accent); color: var(--background); font-weight: 600; font-size: 1rem; border: none; border-radius: 6px; cursor: pointer;">Salvar Impressora</button>
+        </form>
+
+        <hr style="margin: 25px 0; border: 1px solid var(--border);">
+
+        <h3 style="font-size: 1rem; margin-bottom: 10px; color: var(--text-dim);">Máquinas Cadastradas</h3>
+        <div style="max-height: 200px; overflow-y: auto;">
+            <table class="estoque-table" style="width: 100%;">
+                <tbody id="listaImpressorasModal">
+                <!-- Gerado via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 <script src="/js/main.js"></script>
 
