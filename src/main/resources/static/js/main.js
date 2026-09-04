@@ -1,4 +1,5 @@
 let listaImpressoras = [];
+let listaClientes = [];
 let ultimoPrecoCalculado = 0;
 let ultimoCalculoDetalhado = null;
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -9,7 +10,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const ano = now.getFullYear();
     const mes = String(now.getMonth() + 1).padStart(2, '0');
     document.getElementById('filtroMesFinanceiro').value = `${ano}-${mes}`;
+
     carregarImpressoras();
+    carregarClientes(); // Carrega os clientes ao abrir a página
 });
 
 function switchTab(tab) {
@@ -201,6 +204,10 @@ function calcularPreco() {
 }
 
 function salvarOrcamento() {
+    // Pegando os dados do pedido do HTML
+    const clienteId = document.getElementById('pedidoClienteId') ? document.getElementById('pedidoClienteId').value : null;
+    const previsao = document.getElementById('pedidoPrevisao') ? document.getElementById('pedidoPrevisao').value : null;
+
     const dados = {
         nomePeca: document.getElementById('nomePeca').value,
         pesoPeca: parseFloat(document.getElementById('pesoPeca').value) || 0,
@@ -212,7 +219,12 @@ function salvarOrcamento() {
         custoDepreciacao: ultimoCalculoDetalhado.custoDepreciacao,
         custoMaoDeObra: ultimoCalculoDetalhado.custoMaoDeObra,
         valorLucro: ultimoCalculoDetalhado.valorLucro,
-        valorTaxa: ultimoCalculoDetalhado.valorTaxa
+        valorTaxa: ultimoCalculoDetalhado.valorTaxa,
+
+        // Novos campos de pedido
+        statusPedido: "Pendente",
+        dataPrevisaoEntrega: previsao || null,
+        cliente: clienteId ? { id: parseInt(clienteId) } : null
     };
 
     fetch('/api/orcamentos', {
@@ -224,6 +236,11 @@ function salvarOrcamento() {
             if(response.ok) {
                 alert('Peça salva com sucesso no estoque!');
                 document.getElementById('btnSalvar').classList.add('d-none');
+
+                // Limpa os campos do pedido após salvar
+                if(document.getElementById('pedidoClienteId')) document.getElementById('pedidoClienteId').value = '';
+                if(document.getElementById('pedidoPrevisao')) document.getElementById('pedidoPrevisao').value = '';
+
                 switchTab('estoque');
             }
         })
@@ -260,16 +277,14 @@ function carregarEstoque() {
                     dataFormatada = dataObj.toLocaleDateString('pt-BR');
                 }
 
+                // Badge agora é clicável e funciona como o botão de ação!
                 const badgeHTML = orc.vendido
-                    ? '<span class="badge badge-vendido">Vendida</span>'
-                    : '<span class="badge badge-disponivel">Disponível</span>';
-
-                const btnVenderHTML = orc.vendido
-                    ? ''
-                    : `<button class="btn-delete" style="color: var(--result);" onclick="venderPeca(${orc.id}, '${orc.nomePeca}', ${orc.precoFinal})" title="Marcar como Vendido"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></button>`;
+                    ? `<span class="badge badge-vendido" onclick="desfazerVenda(${orc.id}, '${orc.nomePeca}')" style="cursor: pointer; transition: 0.2s;" onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1" title="Clique para desfazer a venda">VENDIDA</span>`
+                    : `<span class="badge badge-disponivel" onclick="venderPeca(${orc.id}, '${orc.nomePeca}', ${orc.precoFinal})" style="cursor: pointer; transition: 0.2s;" onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1" title="Clique para vender">DISPONÍVEL</span>`;
 
                 const trPrincipal = document.createElement('tr');
                 const tempoFormatado = converterDecimalParaTempo(orc.horasImpressao);
+
                 trPrincipal.innerHTML = `
                     <td style="width: 40px;"><button class="btn-expand" onclick="toggleDetails(${orc.id}, this)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button></td>
                     <td style="color: var(--text-dim);">#${orc.id}</td>
@@ -280,10 +295,18 @@ function carregarEstoque() {
                     <td>${badgeHTML}</td>
                     <td style="color: var(--text-dim); font-size: 0.8rem;">${dataFormatada}</td>
                     <td style="text-align: right; display: flex; justify-content: flex-end; gap: 8px;">
-                        ${btnVenderHTML}
                         <button class="btn-delete" onclick="excluirOrcamento(${orc.id})" title="Excluir"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
                     </td>
                 `;
+
+                // Tratando dados do pedido para exibir
+                const nomeCliente = orc.cliente ? orc.cliente.nome : 'Avulso (Sem cliente)';
+                const status = orc.statusPedido || 'Pendente';
+                let previsao = 'Não informada';
+                if (orc.dataPrevisaoEntrega) {
+                    const partes = orc.dataPrevisaoEntrega.split('-');
+                    if (partes.length === 3) previsao = `${partes[2]}/${partes[1]}/${partes[0]}`;
+                }
 
                 const trDetalhes = document.createElement('tr');
                 trDetalhes.id = `details-${orc.id}`;
@@ -291,6 +314,14 @@ function carregarEstoque() {
                 trDetalhes.innerHTML = `
                     <td colspan="9">
                         <div class="details-content">
+                            <!-- Bloco do Pedido -->
+                            <div style="margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid var(--line); font-size: 0.85rem; color: var(--text-dim); display: flex; gap: 20px;">
+                                <div><span style="display: block; font-size: 0.75rem;">Cliente</span> <strong style="color: var(--text);">${nomeCliente}</strong></div>
+                                <div><span style="display: block; font-size: 0.75rem;">Status</span> <strong style="color: var(--accent);">${status}</strong></div>
+                                <div><span style="display: block; font-size: 0.75rem;">Entrega</span> <strong style="color: var(--text);">${previsao}</strong></div>
+                            </div>
+                            
+                            <!-- Bloco Financeiro -->
                             <div class="breakdown-list" style="margin-top: 0; border-top: none; padding-top: 0; gap: 4px; max-width: 400px;">
                                 <div class="breakdown-item"><span>Material:</span> <strong>R$ ${(orc.custoMaterial || 0).toFixed(2).replace('.', ',')}</strong></div>
                                 <div class="breakdown-item"><span>Energia:</span> <strong>R$ ${(orc.custoEnergia || 0).toFixed(2).replace('.', ',')}</strong></div>
@@ -609,4 +640,137 @@ function excluirImpressora(id) {
                 alert('Não foi possível excluir. Talvez ela esteja vinculada a orçamentos.');
             }
         });
+}
+
+// --- CRUD de Clientes ---
+
+function abrirModalClientes() {
+    document.getElementById('modalClientes').classList.remove('d-none');
+    carregarClientes(); // Carrega os dados sempre que abrir a tela
+}
+
+function fecharModalClientes() {
+    document.getElementById('modalClientes').classList.add('d-none');
+    limparFormCliente();
+}
+
+function limparFormCliente() {
+    document.getElementById('cliModalId').value = '';
+    document.getElementById('cliModalNome').value = '';
+    document.getElementById('cliModalTelefone').value = '';
+}
+
+function carregarClientes() {
+    fetch('/api/clientes')
+        .then(res => res.json())
+        .then(data => {
+            listaClientes = data;
+            renderizarListaClientesModal();
+            popularSelectClientes(); // Atualiza o select do formulário de pedidos
+        })
+        .catch(err => console.error(err));
+}
+
+function renderizarListaClientesModal() {
+    const tbody = document.getElementById('listaClientesModal');
+    if(!tbody) return;
+
+    tbody.innerHTML = '';
+
+    listaClientes.forEach(cli => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="font-weight: 500;">${cli.nome}</td>
+            <td style="color: var(--text-dim); font-size: 0.85rem;">${cli.telefone || 'Sem número'}</td>
+            <td style="text-align: right;">
+                <button type="button" class="btn-expand" onclick="editarCliente(${cli.id})" title="Editar" style="padding: 4px; margin-right: 5px;">✏️</button>
+                <button type="button" class="btn-delete" onclick="excluirCliente(${cli.id})" title="Excluir" style="padding: 4px;">❌</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function salvarCliente(event) {
+    event.preventDefault();
+
+    const id = document.getElementById('cliModalId').value;
+    const cliente = {
+        nome: document.getElementById('cliModalNome').value,
+        telefone: document.getElementById('cliModalTelefone').value
+    };
+
+    const url = id ? `/api/clientes/${id}` : '/api/clientes';
+    const method = id ? 'PUT' : 'POST';
+
+    fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cliente)
+    })
+        .then(response => {
+            if(response.ok) {
+                limparFormCliente();
+                carregarClientes(); // Recarrega os clientes e atualiza o select
+            } else {
+                alert('Erro ao salvar cliente.');
+            }
+        })
+        .catch(error => console.error(error));
+}
+
+function editarCliente(id) {
+    const cli = listaClientes.find(c => c.id === id);
+    if(cli) {
+        document.getElementById('cliModalId').value = cli.id;
+        document.getElementById('cliModalNome').value = cli.nome;
+        document.getElementById('cliModalTelefone').value = cli.telefone;
+    }
+}
+
+function excluirCliente(id) {
+    if(!confirm('Tem certeza que deseja excluir este cliente?')) return;
+
+    fetch(`/api/clientes/${id}`, { method: 'DELETE' })
+        .then(response => {
+            if(response.ok) {
+                carregarClientes();
+            } else {
+                alert('Não foi possível excluir.');
+            }
+        });
+}
+
+function popularSelectClientes() {
+    const select = document.getElementById('pedidoClienteId');
+    if (!select) return;
+
+    const valorSelecionado = select.value;
+    select.innerHTML = '<option value="">Sem cliente vinculado</option>';
+
+    listaClientes.forEach(cli => {
+        const opt = document.createElement('option');
+        opt.value = cli.id;
+        opt.textContent = cli.nome;
+        select.appendChild(opt);
+    });
+
+    select.value = valorSelecionado;
+}
+
+function desfazerVenda(id, nomePeca) {
+    if (!confirm(`Deseja desfazer a venda de "${nomePeca}" e devolvê-la ao estoque?`)) {
+        return;
+    }
+
+    fetch(`/api/orcamentos/${id}/desfazer-venda`, { method: 'PATCH' })
+        .then(response => {
+            if(response.ok) {
+                carregarEstoque();
+                alert(`Venda desfeita! Lembre-se de excluir a entrada desse valor lá na aba Financeiro caso você já a tenha contabilizado.`);
+            } else {
+                alert('Erro ao desfazer o status da peça.');
+            }
+        })
+        .catch(error => console.error('Erro ao desfazer venda:', error));
 }
