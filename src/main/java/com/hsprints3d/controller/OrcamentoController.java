@@ -44,4 +44,12 @@ public class OrcamentoController {
             return ResponseEntity.ok(repository.save(orcamento));
         }).orElse(ResponseEntity.notFound().build());
     }
+
+    @PatchMapping("/{id}/desfazer-venda")
+    public ResponseEntity<Orcamento> desfazerVenda(@PathVariable Long id){
+        return repository.findById(id).map(orc -> {
+            orc.setVendido(false);
+            return ResponseEntity.ok(repository.save(orc));
+                }).orElse(ResponseEntity.notFound().build());
+    }
 }
