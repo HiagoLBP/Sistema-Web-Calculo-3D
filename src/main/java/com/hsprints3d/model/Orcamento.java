@@ -25,6 +25,13 @@ public class Orcamento {
     private double valorLucro;
     private double valorTaxa;
 
+    @ManyToOne
+    @JoinColumn(name = "cliente_id")
+    private Cliente cliente;
+
+    private String statusPedido = "Pendente";
+    private String dataPrevisaoEntrega;
+
     private LocalDateTime dataCalculo = LocalDateTime.now();
 
     public Long getId() {
@@ -137,5 +144,29 @@ public class Orcamento {
 
     public void setValorTaxa(double valorTaxa) {
         this.valorTaxa = valorTaxa;
+    }
+
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
+
+    public String getStatusPedido() {
+        return statusPedido;
+    }
+
+    public void setStatusPedido(String statusPedido) {
+        this.statusPedido = statusPedido;
+    }
+
+    public String getDataPrevisaoEntrega() {
+        return dataPrevisaoEntrega;
+    }
+
+    public void setDataPrevisaoEntrega(String dataPrevisaoEntrega) {
+        this.dataPrevisaoEntrega = dataPrevisaoEntrega;
     }
 }
