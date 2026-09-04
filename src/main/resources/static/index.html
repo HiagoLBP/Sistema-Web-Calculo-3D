@@ -28,6 +28,7 @@
             <button id="btnTabCalculadora" class="nav-btn active" onclick="switchTab('calculadora')">Calculadora</button>
             <button id="btnTabEstoque" class="nav-btn" onclick="switchTab('estoque')">Meu Estoque</button>
             <button id="btnTabFinanceiro" class="nav-btn" onclick="switchTab('financeiro')">Financeiro</button>
+            <button class="nav-btn" onclick="abrirModalClientes()">👥 Clientes</button>
         </div>
 
         <!-- Botões de Backup -->
@@ -129,7 +130,7 @@
                     </div>
                     <div class="field">
                         <label for="valorHoraTrabalho">Valor da hora (R$)</label>
-                        <input type="number" id="valorHoraTrabalho" value="10" required>
+                        <input type="number" id="valorHoraTrabalho" value="0" required>
                     </div>
                     <div class="field">
                         <label for="markupDesejado">Markup</label>
@@ -137,7 +138,7 @@
                     </div>
                     <div class="field">
                         <label for="taxaMarketplace">Taxa do marketplace</label>
-                        <input type="number" step="0.01" id="taxaMarketplace" value="0.15" required>
+                        <input type="number" step="0.01" id="taxaMarketplace" value="0.00" required>
                     </div>
                 </div>
             </section>
@@ -166,7 +167,24 @@
                         <div class="breakdown-item"><span>Lucro:</span> <strong id="bkLucro" style="color: var(--result);">R$ 0,00</strong></div>
                         <div class="breakdown-item"><span>Taxa Marketplace:</span> <strong id="bkTaxa" style="color: var(--danger);">R$ 0,00</strong></div>
                     </div>
-
+                    <div class="field-group" style="margin-top: 20px;">
+                        <div class="field-group-head">
+                            <div class="fg-icon">📦</div>
+                            <h2>Dados do Pedido (Opcional)</h2>
+                        </div>
+                        <div class="field-row">
+                            <div class="field">
+                                <label for="pedidoClienteId">Cliente</label>
+                                <select id="pedidoClienteId">
+                                    <option value="">Sem cliente vinculado</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="pedidoPrevisao">Previsão de Entrega</label>
+                                <input type="date" id="pedidoPrevisao">
+                            </div>
+                        </div>
+                    </div>
                     <button type="button" class="btn-calc d-none" id="btnSalvar" style="margin-top: 15px; background: var(--result); color: var(--bg); width: 100%;" onclick="salvarOrcamento()">Salvar no Estoque</button>
                 </div>
                 <div class="result-error d-none" id="resultError">
@@ -336,6 +354,39 @@
             <table class="estoque-table" style="width: 100%;">
                 <tbody id="listaImpressorasModal">
                 <!-- Gerado via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Clientes -->
+<div id="modalClientes" class="modal-overlay d-none">
+    <div class="modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0; font-size: 1.2rem;">Gerenciar Clientes</h2>
+            <button class="btn-delete" onclick="fecharModalClientes()" style="font-size: 1.5rem;">&times;</button>
+        </div>
+
+        <form id="formCliente" onsubmit="salvarCliente(event)">
+            <input type="hidden" id="cliModalId">
+            <div class="field">
+                <label for="cliModalNome">Nome do Cliente</label>
+                <input type="text" id="cliModalNome" placeholder="Ex: João da Silva" required>
+            </div>
+            <div class="field" style="margin-top: 12px;">
+                <label for="cliModalTelefone">WhatsApp / Telefone</label>
+                <input type="text" id="cliModalTelefone" placeholder="Ex: 11999999999">
+            </div>
+            <button type="submit" style="width: 100%; margin-top: 15px; padding: 12px; background-color: var(--accent); color: var(--background); font-weight: 600; font-size: 1rem; border: none; border-radius: 6px; cursor: pointer;">Salvar Cliente</button>
+        </form>
+
+        <hr style="margin: 25px 0; border: 1px solid var(--border);">
+
+        <h3 style="font-size: 1rem; margin-bottom: 10px; color: var(--text-dim);">Clientes Cadastrados</h3>
+        <div style="max-height: 200px; overflow-y: auto;">
+            <table class="estoque-table" style="width: 100%;">
+                <tbody id="listaClientesModal">
                 </tbody>
             </table>
         </div>
