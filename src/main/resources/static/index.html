@@ -28,6 +28,7 @@
             <button id="btnTabCalculadora" class="nav-btn active" onclick="switchTab('calculadora')">Calculadora</button>
             <button id="btnTabEstoque" class="nav-btn" onclick="switchTab('estoque')">Meu Estoque</button>
             <button id="btnTabFinanceiro" class="nav-btn" onclick="switchTab('financeiro')">Financeiro</button>
+            <button id="btnTabBobinas" class="nav-btn" onclick="switchTab('bobinas')">🧵 Bobinas</button>
             <button class="nav-btn" onclick="abrirModalClientes()">👥 Clientes</button>
         </div>
 
@@ -70,14 +71,15 @@
                     Selecione uma impressora para ver os detalhes.
                 </div>
 
-                <div class="field-row">
+                <div class="field-row single">
                     <div class="field">
-                        <label for="precoRolo">Preço do rolo (R$)</label>
-                        <input type="number" step="0.01" id="precoRolo" value="130.00" required>
-                    </div>
-                    <div class="field">
-                        <label for="pesoRolo">Peso do rolo (g)</label>
-                        <input type="number" id="pesoRolo" value="1000" required>
+                        <label for="calculadoraBobinaId">Bobina (Material)</label>
+                        <select id="calculadoraBobinaId" onchange="aplicarBobinaSelecionada()" required>
+                            <option value="">Escolha uma bobina do estoque...</option>
+                        </select>
+
+                        <input type="hidden" id="precoRolo" value="0">
+                        <input type="hidden" id="pesoRolo" value="0">
                     </div>
                 </div>
             </section>
@@ -153,11 +155,19 @@
                 </div>
 
                 <div class="result-filled d-none" id="resultadoBox">
-                    <span class="result-label">Preço sugerido</span>
-                    <div class="result-value">R$ <span id="valorFinal">0,00</span></div>
-                    <p class="result-caption">Calculado com base no material, energia, mão de obra, markup e taxa informados.</p>
+                    <span class="result-label">Preço unitário sugerido</span>
 
-                    <!-- NOVA LISTA DE CUSTOS SEPARADOS -->
+                    <div class="result-value" style="display: flex; justify-content: center; align-items: center; margin: 12px 0;">
+                        <span style="font-size: 1.5rem; margin-right: 8px; color: var(--text-dim);">R$</span>
+                        <input type="number" id="valorFinal" step="0.01" style="width: 150px; font-size: 2.2rem; font-weight: 700; text-align: center; background: var(--surface-2); border: 2px solid var(--line); border-radius: 8px; color: var(--result); font-family: inherit; padding: 4px;" oninput="verificarPrejuizo()">
+                    </div>
+
+                    <div id="alertaPrejuizo" class="d-none" style="background: rgba(255, 74, 74, 0.1); border: 1px solid var(--danger); color: var(--danger); padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9rem; font-weight: 500; text-align: left;">
+                        <span style="font-size: 1.2rem;">⚠️</span> <strong style="font-size: 0.95rem;">Aviso de Prejuízo!</strong><br>
+                        O custo de produção é de <strong>R$ <span id="custoBaseAlerta">0,00</span></strong>.<br>
+                        Você está perdendo <strong style="text-decoration: underline;">R$ <span id="valorPrejuizo">0,00</span></strong> nesta venda.
+                    </div>
+
                     <div class="breakdown-list">
                         <div class="breakdown-item"><span>Material:</span> <strong id="bkMaterial">R$ 0,00</strong></div>
                         <div class="breakdown-item"><span>Energia:</span> <strong id="bkEnergia">R$ 0,00</strong></div>
@@ -167,31 +177,54 @@
                         <div class="breakdown-item"><span>Lucro:</span> <strong id="bkLucro" style="color: var(--result);">R$ 0,00</strong></div>
                         <div class="breakdown-item"><span>Taxa Marketplace:</span> <strong id="bkTaxa" style="color: var(--danger);">R$ 0,00</strong></div>
                     </div>
-                    <div class="field-group" style="margin-top: 20px;">
-                        <div class="field-group-head">
-                            <div class="fg-icon">📦</div>
-                            <h2>Dados do Pedido (Opcional)</h2>
-                        </div>
-                        <div class="field-row">
-                            <div class="field">
-                                <label for="pedidoClienteId">Cliente</label>
-                                <select id="pedidoClienteId">
-                                    <option value="">Sem cliente vinculado</option>
-                                </select>
-                            </div>
-                            <div class="field">
-                                <label for="pedidoPrevisao">Previsão de Entrega</label>
-                                <input type="date" id="pedidoPrevisao">
-                            </div>
+
+                    <div class="field-row single" style="margin-bottom: 15px; margin-top: 15px;">
+                        <div class="field">
+                            <label for="quantidadeItem">Quantidade desta peça</label>
+                            <input type="number" id="quantidadeItem" value="1" min="1">
                         </div>
                     </div>
-                    <button type="button" class="btn-calc d-none" id="btnSalvar" style="margin-top: 15px; background: var(--result); color: var(--bg); width: 100%;" onclick="salvarOrcamento()">Salvar no Estoque</button>
+
+                    <button type="button" class="btn-calc" style="background: var(--accent); color: var(--bg); margin-bottom: 20px; width: 100%;" onclick="adicionarAoCarrinho()">Adicionar ao Pedido</button>
                 </div>
+
                 <div class="result-error d-none" id="resultError">
                     Não foi possível calcular. Confira os dados e tente novamente.
                 </div>
 
                 <button type="button" class="btn-calc" onclick="calcularPreco()">Calcular preço</button>
+
+                <div id="areaCarrinho" class="d-none" style="margin-top: 30px; padding-top: 20px; border-top: 2px dashed var(--line);">
+                    <div class="field-group-head">
+                        <div class="fg-icon">🛒</div>
+                        <h2>Itens do Pedido</h2>
+                    </div>
+
+                    <div id="listaCarrinho" style="margin-bottom: 15px; max-height: 200px; overflow-y: auto;">
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: bold; margin-bottom: 15px;">
+                        <span>Total do Pedido:</span>
+                        <span style="color: var(--result);">R$ <span id="totalCarrinho">0,00</span></span>
+                    </div>
+
+                    <div class="field-group">
+                        <div class="field-row">
+                            <div class="field">
+                                <label for="pedidoClienteId">Cliente</label>
+                                <select id="pedidoClienteId">
+                                    <option value="">Sem cliente</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="pedidoPrevisao">Previsão</label>
+                                <input type="date" id="pedidoPrevisao">
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-calc" style="background: var(--result); color: var(--bg); width: 100%; margin-top: 15px;" onclick="salvarOrcamento()">Salvar Pedido Completo</button>
+                </div>
             </div>
         </aside>
     </div>
@@ -305,6 +338,55 @@
             </section>
         </div>
     </div>
+
+    <div id="tabBobinas" class="d-none">
+        <div class="workspace" style="grid-template-columns: 1fr 2fr;">
+
+            <div class="panel-form">
+                <section class="field-group">
+                    <div class="field-group-head">
+                        <h2>Nova Bobina</h2>
+                    </div>
+                    <form id="formBobina" onsubmit="salvarBobina(event)">
+                        <div class="field-row single">
+                            <div class="field">
+                                <label>Material (Ex: PLA, ABS, PETG)</label>
+                                <input type="text" id="bobMaterial" required>
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field">
+                                <label>Cor</label>
+                                <input type="text" id="bobCor" required>
+                            </div>
+                            <div class="field">
+                                <label>Marca</label>
+                                <input type="text" id="bobMarca">
+                            </div>
+                        </div>
+                        <div class="field-row">
+                            <div class="field">
+                                <label>Peso Inicial (g)</label>
+                                <input type="number" id="bobPesoInicial" value="1000" required>
+                            </div>
+                            <div class="field">
+                                <label>Preço Pago (R$)</label>
+                                <input type="number" step="0.01" id="bobPreco" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-calc" style="width: 100%; margin-top: 15px; background: var(--accent); color: var(--bg);">Cadastrar Bobina</button>
+                    </form>
+                </section>
+            </div>
+
+            <div class="panel-form" style="background: transparent; border: none; padding: 0;">
+                <div class="dash-grid" id="listaBobinasGrid" style="grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px;">
+                </div>
+            </div>
+
+        </div>
+    </div>
+
 </div>
 <!-- Modal de Impressoras -->
 <div id="modalImpressoras" class="modal-overlay d-none">
@@ -392,7 +474,87 @@
         </div>
     </div>
 </div>
-<script src="/js/main.js"></script>
+
+<!-- Template Oculto para o PDF -->
+<div id="reciboWrapper" style="position: absolute; top: 0; left: -9999px;">
+    <div id="reciboTemplate" style="width: 650px; padding: 36px; background: #ffffff; color: #1a1a1a; font-family: 'Space Grotesk', Arial, sans-serif; border: 1px solid #e5e7eb; border-radius: 14px; box-sizing: border-box;">
+
+        <!-- Cabeçalho -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #ff8a3d; padding-bottom: 18px; margin-bottom: 26px;">
+            <div>
+                <h1 style="margin: 0; color: #ff8a3d; font-size: 1.7rem; font-weight: 700;">HS Prints 3D</h1>
+                <p style="margin: 6px 0 0; color: #6b7280; font-size: 0.9rem;">Impressão 3D sob encomenda</p>
+            </div>
+            <div style="text-align: right;">
+                <p style="margin: 0; color: #9ca3af; font-size: 0.72rem; letter-spacing: .04em;">ORÇAMENTO</p>
+                <h2 style="margin: 4px 0 0; font-size: 1.4rem; font-family: 'IBM Plex Mono', 'Courier New', monospace; color: #1a1a1a;">Nº <span id="pdfId"></span></h2>
+                <p style="margin: 6px 0 0; color: #6b7280; font-size: 0.85rem;">Data: <span id="pdfData"></span></p>
+            </div>
+        </div>
+
+        <!-- Dados do Cliente -->
+        <div style="background: #f8f9fb; border: 1px solid #eef0f3; border-radius: 10px; padding: 16px 18px; margin-bottom: 26px;">
+            <p style="margin: 0 0 10px; color: #374151; font-size: 0.78rem; font-weight: 600;">Dados do cliente</p>
+            <div style="display: flex; justify-content: space-between; gap: 16px;">
+                <div style="flex: 1;">
+                    <p style="margin: 0; color: #9ca3af; font-size: 0.72rem;">Nome</p>
+                    <p style="margin: 3px 0 0; color: #1a1a1a; font-size: 0.92rem; font-weight: 500;" id="pdfClienteNome"></p>
+                </div>
+                <div style="flex: 1;">
+                    <p style="margin: 0; color: #9ca3af; font-size: 0.72rem;">Telefone</p>
+                    <p style="margin: 3px 0 0; color: #1a1a1a; font-size: 0.92rem; font-weight: 500;" id="pdfClienteTel"></p>
+                </div>
+                <div style="flex: 1;">
+                    <p style="margin: 0; color: #9ca3af; font-size: 0.72rem;">Previsão de entrega</p>
+                    <p style="margin: 3px 0 0; color: #1a1a1a; font-size: 0.92rem; font-weight: 500;" id="pdfPrevisao"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabela de Peças -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 22px; text-align: left;">
+            <thead>
+            <tr style="background: #f4f4f5;">
+                <th style="padding: 11px 12px; border: 1px solid #e5e7eb; font-size: 0.8rem; color: #374151;">Descrição do serviço / peça</th>
+                <th style="padding: 11px 12px; border: 1px solid #e5e7eb; font-size: 0.8rem; color: #374151; text-align: center;">Peso</th>
+                <th style="padding: 11px 12px; border: 1px solid #e5e7eb; font-size: 0.8rem; color: #374151; text-align: center;">Tempo est.</th>
+                <th style="padding: 11px 12px; border: 1px solid #e5e7eb; font-size: 0.8rem; color: #374151; text-align: right;">Valor</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td style="padding: 12px; border: 1px solid #e5e7eb; font-size: 0.92rem;" id="pdfPeca"></td>
+                <td style="padding: 12px; border: 1px solid #e5e7eb; font-size: 0.9rem; text-align: center; font-family: 'IBM Plex Mono', 'Courier New', monospace;" id="pdfPeso"></td>
+                <td style="padding: 12px; border: 1px solid #e5e7eb; font-size: 0.9rem; text-align: center; font-family: 'IBM Plex Mono', 'Courier New', monospace;" id="pdfTempo"></td>
+                <td style="padding: 12px; border: 1px solid #e5e7eb; font-size: 0.9rem; text-align: right; font-family: 'IBM Plex Mono', 'Courier New', monospace;">R$ <span id="pdfValorItem"></span></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- Total -->
+        <div style="text-align: right; margin-bottom: 30px;">
+            <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Total geral</p>
+            <h2 style="margin: 4px 0 0; font-size: 2rem; font-family: 'IBM Plex Mono', 'Courier New', monospace; color: #ff8a3d; font-weight: 600;">R$ <span id="pdfTotal"></span></h2>
+        </div>
+
+        <!-- Rodapé -->
+        <div style="border-top: 1px solid #eef0f3; padding-top: 16px; text-align: center; font-size: 0.8rem; color: #9ca3af;">
+            <p style="margin: 0;">Este orçamento é válido por 15 dias a partir da data de emissão.</p>
+            <p style="margin: 4px 0 0;">Obrigado pela preferência!</p>
+        </div>
+
+    </div>
+</div>
+
+<script src="js/calculadora.js"></script>
+<script src="js/estoque.js"></script>
+<script src="js/financeiro.js"></script>
+<script src="js/impressoras.js"></script>
+<script src="js/clientes.js"></script>
+<script src="js/bobinas.js"></script>
+<script src="js/main.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 </body>
 </html>
