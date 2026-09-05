@@ -1,4 +1,4 @@
-package com.hsprints3d.model;
+package com.hsprints3d.dto;
 
 import jakarta.validation.constraints.Min;
 

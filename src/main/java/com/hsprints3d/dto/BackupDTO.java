@@ -1,4 +1,8 @@
-package com.hsprints3d.model;
+package com.hsprints3d.dto;
+
+import com.hsprints3d.model.Cliente;
+import com.hsprints3d.model.Impressora;
+import com.hsprints3d.model.Orcamento;
 
 import java.util.List;
 

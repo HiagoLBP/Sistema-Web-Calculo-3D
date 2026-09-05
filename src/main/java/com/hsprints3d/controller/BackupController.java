@@ -1,6 +1,6 @@
 package com.hsprints3d.controller;
 
-import com.hsprints3d.model.BackupDTO;
+import com.hsprints3d.dto.BackupDTO;
 import com.hsprints3d.model.Cliente;
 import com.hsprints3d.model.Impressora;
 import com.hsprints3d.model.Orcamento;

@@ -1,6 +1,6 @@
 package com.hsprints3d.service;
 
-import com.hsprints3d.model.CalculoResponse;
+import com.hsprints3d.dto.CalculoResponse;
 import com.hsprints3d.model.Impressora;
 import com.hsprints3d.repository.ImpressoraRepository;
 import org.springframework.stereotype.Service;

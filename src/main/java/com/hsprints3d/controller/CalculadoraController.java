@@ -1,7 +1,7 @@
 package com.hsprints3d.controller;
 
-import com.hsprints3d.model.CalculoRequest;
-import com.hsprints3d.model.CalculoResponse;
+import com.hsprints3d.dto.CalculoRequest;
+import com.hsprints3d.dto.CalculoResponse;
 import com.hsprints3d.service.CalculadoraService;
 import jakarta.annotation.Nonnull;
 import jakarta.validation.Valid;
